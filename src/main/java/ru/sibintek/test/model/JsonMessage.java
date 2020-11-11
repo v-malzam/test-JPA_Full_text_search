@@ -6,6 +6,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -18,6 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Indexed
 @Table(name = "json_messages")
 public class JsonMessage {
 
@@ -28,6 +32,7 @@ public class JsonMessage {
 
     @JsonValue
     @JsonRawValue
+    @Field
     @Column(name = "json_data")
     private String jsonData;
 }

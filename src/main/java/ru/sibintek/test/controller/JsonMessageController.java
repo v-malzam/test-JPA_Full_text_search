@@ -38,10 +38,18 @@ public class JsonMessageController {
         return new ResponseEntity<>(jsonMessage, headers, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/keyword/{keyword}", produces = "application/json")
+    public ResponseEntity<List<JsonMessage>> getByKeyword(@PathVariable String keyword) {
+
+        List<JsonMessage> jsonMessages = jsonMessageService.keywordQuery(keyword);
+        return new ResponseEntity<>(jsonMessages, headers, HttpStatus.OK);
+    }
+
     @PostMapping(consumes = "application/json", produces = "application/json")
     public ResponseEntity<JsonMessage> add(@RequestBody String requestBody) {
 
-        JsonMessage createdJsonMessage = jsonMessageService.create(buildJsonMessage(requestBody));
+        JsonMessage createdJsonMessage = jsonMessageService
+                .create(jsonMessageService.buildJsonMessage(requestBody));
         return new ResponseEntity<>(createdJsonMessage, headers, HttpStatus.CREATED);
     }
 
@@ -50,17 +58,5 @@ public class JsonMessageController {
 
         jsonMessageService.delete(jsonMessageService.getById(id));
         return new ResponseEntity<>(headers, HttpStatus.OK);
-    }
-
-    private JsonMessage buildJsonMessage(String requestBody) {
-        int indexKeyId = requestBody.indexOf("id");
-        int lastIndexField = requestBody.indexOf(",", indexKeyId);
-        String substringWithId = requestBody.substring(indexKeyId, lastIndexField);
-
-        int firstIndexField = indexKeyId + substringWithId.indexOf(":") + 1;
-        String substringFieldId = requestBody.substring(firstIndexField, lastIndexField);
-
-        Long id = Long.parseLong(substringFieldId.trim());
-        return new JsonMessage(id, requestBody);
     }
 }

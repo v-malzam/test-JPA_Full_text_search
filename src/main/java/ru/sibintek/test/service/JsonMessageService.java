@@ -4,6 +4,11 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.lucene.search.Query;
+import org.hibernate.search.jpa.FullTextEntityManager;
+import org.hibernate.search.jpa.FullTextQuery;
+import org.hibernate.search.jpa.Search;
+import org.hibernate.search.query.dsl.QueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,5 +49,29 @@ public class JsonMessageService {
 
     public boolean existsById(Long id) {
         return jsonMessageRepository.existsById(id);
+    }
+    
+    public JsonMessage buildJsonMessage(String requestBody) {
+        int indexKeyId = requestBody.indexOf("id");
+        int lastIndexField = requestBody.indexOf(",", indexKeyId);
+        String substringWithId = requestBody.substring(indexKeyId, lastIndexField);
+
+        int firstIndexField = indexKeyId + substringWithId.indexOf(":") + 1;
+        String substringFieldId = requestBody.substring(firstIndexField, lastIndexField);
+
+        Long id = Long.parseLong(substringFieldId.trim());
+        return new JsonMessage(id, requestBody);
+    }
+
+    public List<JsonMessage> keywordQuery(String keyword) {
+        FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(entityManager);
+
+        QueryBuilder queryBuilder = fullTextEntityManager.getSearchFactory().buildQueryBuilder()
+                .forEntity(JsonMessage.class).get();
+
+        Query query = queryBuilder.keyword().onField("jsonData").matching(keyword).createQuery();
+
+        FullTextQuery jpaQuery = fullTextEntityManager.createFullTextQuery(query, JsonMessage.class);
+        return jpaQuery.getResultList();
     }
 }
