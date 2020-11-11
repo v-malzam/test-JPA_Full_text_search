@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import ru.sibintek.test.model.JsonDto;
 import ru.sibintek.test.model.JsonMessage;
 import ru.sibintek.test.service.JsonMessageService;
 
@@ -27,13 +28,13 @@ public class JsonMessageController {
     @Autowired
     private JsonMessageService jsonMessageService;
 
-    @GetMapping
-    public ResponseEntity<List<String>> getAll() {
+    @GetMapping(produces = "application/json")
+    public ResponseEntity<List<JsonDto>> getAll() {
         List<JsonMessage> jsonMessages = jsonMessageService.getAll();
 
-        List<String> jsonData = new ArrayList<>();
+        List<JsonDto> jsonData = new ArrayList<>();
         for (JsonMessage jsonMessage : jsonMessages) {
-            jsonData.add(jsonMessage.getJsonData());
+            jsonData.add(new JsonDto(jsonMessage.getJsonData()));
         }
 
         headers.clear();
@@ -62,16 +63,6 @@ public class JsonMessageController {
         headers.add(CUSTOM_HEADER_NAME,
                 "Created JsonMessage object with id " + createdJsonMessage.getId());
         return new ResponseEntity<>(createdJsonData, headers, HttpStatus.CREATED);
-    }
-
-    @PutMapping
-    public ResponseEntity<JsonMessage> update(@RequestBody JsonMessage jsonMessage) {
-        JsonMessage updatedJsonMessage = jsonMessageService.update(jsonMessage);
-
-        headers.clear();
-        headers.add(CUSTOM_HEADER_NAME,
-                "Updated JsonMessage object with id " + updatedJsonMessage.getId());
-        return new ResponseEntity<>(updatedJsonMessage, headers, HttpStatus.OK);
     }
 
     @DeleteMapping("{id}")
