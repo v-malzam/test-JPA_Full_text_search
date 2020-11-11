@@ -1,5 +1,6 @@
 package ru.sibintek.test.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,34 +28,46 @@ public class JsonMessageController {
     private JsonMessageService jsonMessageService;
 
     @GetMapping
-    public ResponseEntity<List<JsonMessage>> getAll() {
+    public ResponseEntity<List<String>> getAll() {
         List<JsonMessage> jsonMessages = jsonMessageService.getAll();
+
+        List<String> jsonData = new ArrayList<>();
+        for (JsonMessage jsonMessage : jsonMessages) {
+            jsonData.add(jsonMessage.getJsonData());
+        }
+
         headers.clear();
         headers.add(CUSTOM_HEADER_NAME,
                 "All objects JsonMessage found. Number of objects " + jsonMessages.size());
-        return new ResponseEntity<>(jsonMessages, headers, HttpStatus.OK);
+        return new ResponseEntity<>(jsonData, headers, HttpStatus.OK);
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<JsonMessage> getById(@PathVariable Long id) {
-        JsonMessage jsonMessages = jsonMessageService.getById(id);
+    public ResponseEntity<String> getById(@PathVariable Long id) {
+        JsonMessage jsonMessage = jsonMessageService.getById(id);
+        String jsonData = jsonMessage.getJsonData();
+
         headers.clear();
         headers.add(CUSTOM_HEADER_NAME, "Found JsonMessage object with id " + id);
-        return new ResponseEntity<>(jsonMessages, headers, HttpStatus.OK);
+        return new ResponseEntity<>(jsonData, headers, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<JsonMessage> add(@RequestBody JsonMessage jsonMessage) {
+    public ResponseEntity<String> add(@RequestBody String requestBody) {
+        JsonMessage jsonMessage = buildEntity(requestBody);
         JsonMessage createdJsonMessage = jsonMessageService.create(jsonMessage);
+        String createdJsonData = createdJsonMessage.getJsonData();
+
         headers.clear();
         headers.add(CUSTOM_HEADER_NAME,
                 "Created JsonMessage object with id " + createdJsonMessage.getId());
-        return new ResponseEntity<>(createdJsonMessage, headers, HttpStatus.CREATED);
+        return new ResponseEntity<>(createdJsonData, headers, HttpStatus.CREATED);
     }
 
     @PutMapping
     public ResponseEntity<JsonMessage> update(@RequestBody JsonMessage jsonMessage) {
         JsonMessage updatedJsonMessage = jsonMessageService.update(jsonMessage);
+
         headers.clear();
         headers.add(CUSTOM_HEADER_NAME,
                 "Updated JsonMessage object with id " + updatedJsonMessage.getId());
@@ -64,8 +77,24 @@ public class JsonMessageController {
     @DeleteMapping("{id}")
     public ResponseEntity<JsonMessage> delete(@PathVariable Long id) {
         jsonMessageService.delete(jsonMessageService.getById(id));
+
         headers.clear();
         headers.add(CUSTOM_HEADER_NAME, "Deleted JsonMessage object with id " + id);
         return new ResponseEntity<>(headers, HttpStatus.OK);
+    }
+
+    private JsonMessage buildEntity(String requestBody) {
+        JsonMessage jsonMessage = new JsonMessage(null, requestBody);
+
+        int indexKeyId = requestBody.indexOf("id");
+        int lastIndexField = requestBody.indexOf(",", indexKeyId);
+        String substringWithId = requestBody.substring(indexKeyId, lastIndexField);
+
+        int firstIndexField = indexKeyId + substringWithId.indexOf(":") + 1;
+        String substringFieldId = requestBody.substring(firstIndexField, lastIndexField);
+
+        Long id = Long.parseLong(substringFieldId.trim());
+        jsonMessage.setId(id);
+        return jsonMessage;
     }
 }
