@@ -1,7 +1,5 @@
 package ru.sibintek.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -14,6 +12,8 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(classes = JsonToDbApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(OrderAnnotation.class)
@@ -33,18 +33,18 @@ class JsonToDbApplicationTests {
         headers.add("Content-Type", "application/json");
         return headers;
     }
-    
-    private String message14 = "{\r\n"
-                + "  \"id\": 14,\r\n"
-                + "  \"login\": \"john\",\r\n"
-                + "  \"password\": \"sdH4k\"\r\n"
-                + "}";
-    private String message52 = "{\r\n"
-                + "  \"id\": 52,\r\n"
-                + "  \"name\": \"user\",\r\n"
-                + "  \"description\": \"role user\"\r\n"
-                + "}";
-    
+
+    private final String message14 = "{\r\n"
+            + "  \"id\": 14,\r\n"
+            + "  \"login\": \"john\",\r\n"
+            + "  \"password\": \"sdH4k\"\r\n"
+            + "}";
+    private final String message52 = "{\r\n"
+            + "  \"id\": 52,\r\n"
+            + "  \"name\": \"user\",\r\n"
+            + "  \"description\": \"role user\"\r\n"
+            + "}";
+
     @Test
     @Order(1)
     void testAddMessages() {
@@ -80,7 +80,7 @@ class JsonToDbApplicationTests {
         assertEquals(200, responseEntity.getStatusCodeValue());
         assertEquals(message14, responseEntity.getBody());
     }
-    
+
     @Test
     @Order(4)
     void testGetJsonMessageByKeyword() {
@@ -91,8 +91,8 @@ class JsonToDbApplicationTests {
                 + "]";
         assertEquals(200, responseEntity.getStatusCodeValue());
         assertEquals(expectedMessage, responseEntity.getBody());
-    }    
-    
+    }
+
     @Test
     @Order(5)
     void testDeleteRole() {
